@@ -4,6 +4,8 @@
 
 import evSOLve.JEvolution.*;
 import evSOLve.JEvolution.chromosomes.BitChromosome;
+import evSOLve.JEvolution.chromosomes.IntChromosome;
+import evSOLve.JEvolution.misc.Utilities;
 import evSOLve.JEvolution.selection.TournamentSelection;
 
 /** A test bed for the package evSOLve.JEvolution.
@@ -34,28 +36,33 @@ public class GATest {
 	public static void main(String[] args) {
 
 		JEvolution GA = JEvolution.getInstance();								//+ call it a GA
-		GA.setMaximization(false);												//o minimization problem
+		GA.setMaximization(false);															//o minimization problem
 		JEvolutionReporter GAReporter = (JEvolutionReporter)GA.getReporter();	//- get the reporter
-		BitChromosome chromX = new BitChromosome();								//+ create a chromosome
+		IntChromosome chromX = new IntChromosome();								//set IntChromosome instead of Bitchromosome to better visualize the resources of territories
+
 
 		try {
-			chromX.setLength(12);										//- only set to justify try statement..;-)
+				// we set the length of chromosomes because we have 3 Territories |x y||x y||x y|
+				chromX.setLength(8);
+				chromX.setCrossoverPoints(2); // we set Crossover point at 2 xy|xyxy
 //			chromX.setMutationRate(0.0);
 //			chromX.setSoupType(Chromosome.LAPLACE);
-//			chromX.setCrossoverPoints(2);
-// 			Utilities.setRandomSeed(88);
+//				Utilities.setRandomSeed(88);
 
-			BitChromosome chromY = (BitChromosome)chromX.clone();		//- second chromosome, demonstration purpose
 
+			IntChromosome chromY = (IntChromosome)chromX.clone();		//- second chromosome, demonstration purpose
 			GA.addChromosome(chromX);									//+ tell GA about your chromosome
 			GA.addChromosome(chromY);									//- second one
-			GA.setPhenotype(new ParaboloidPhenotype());					//+ tell GA about your Phenotype class
-			GA.setSelection(new TournamentSelection(3));
-// 			GA.setPopulationSize(25, 50);
-			GA.setFitnessThreshold(0.00001);				//o may cause earlier termination, hence save time
-			GA.setMaximalGenerations(100);					//o
-// 			GA.setSubPopulations(10);						//o
 
+
+			GA.setPhenotype(new AgentPhenotype());					//+ tell GA the Agent Phenotype
+			GA.setSelection(new TournamentSelection(GA.getMaximalGenerations()));
+		//	GA.setPopulationSize(25, 50);
+			GA.setFitnessThreshold(0.00001);				//o may cause earlier termination, hence save time
+			GA.setMaximalGenerations(30);					//o
+// 		GA.setSubPopulations(10);						//o
+
+			//Print out the Results of Generations
 			GAReporter.setReportLevel(JEvolutionReporter.BRIEF);
 // 			GAReporter.useFitnessRepository(true);
 
