@@ -72,7 +72,7 @@ public class AgentPhenotype implements Phenotype {
         for (int i = 0; i < 2; i++) {                                // two Chromosomes
             IntChromosome bc = (IntChromosome) genotype.get(i);        // get single Chromosome
 
-            double v = Utilities.nextRealInRange( bc.getLow()*10, bc.getHigh()*10);    // v in [0, 99]
+            double v = Utilities.nextIntegerInRange( bc.getLow()*10, bc.getHigh()*10);    // v in [0, 99]
             if (i == 0) {
                 food = (int) v;
                 //System.out.println("Food: " +food);
@@ -82,21 +82,16 @@ public class AgentPhenotype implements Phenotype {
         }
     }
 
-
-
     /**
      * The fitness function of strategy just based on simple strategy for one resource in this case "Water".
      * We actually check the territories and choose one where more water as a food
      */
 
+    // не ебу как это сделать что я написал выше
     public void calcFitness() {
 
-
-
       fitness = Math.max(water + water, food+food);
-
     }
-
 
     /** Access to the fitness of the Phenotype. */
 
@@ -112,7 +107,6 @@ public class AgentPhenotype implements Phenotype {
 
         return ("food: " + food*10 + " water: " + water*10);
     }
-
 
     /**
      * Saves the phenotype to XML.
