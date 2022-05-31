@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Individual>
+  <Fitness>1.0</Fitness>
+  <Genotype>
+    <Chromosome>
+      <Name>evSOLve.JEvolution.chromosomes.PermChromosome</Name>
+      <Bases>0|1|2|3|4|5|6|7|8|9|</Bases>
+      <Length>10</Length>
+      <MutationRate>0.1</MutationRate>
+      <CrossoverRate>0.6</CrossoverRate>
+      <SoupType>0</SoupType>
+      <Low>0</Low>
+      <High>9</High>
+    </Chromosome>
+  </Genotype>
+  <PhenotypeName>SortPhenotype</PhenotypeName>
+  <Phenotype>
+    <Items>10</Items>
+    <Correct>10</Correct>
+  </Phenotype>
+</Individual>

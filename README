@@ -1,0 +1,237 @@
+Technical Remarks
+
+- To use JEvolution simply make "JEvolution.jar" (and "jdom-2.0.5.jar") available in your classpath
+
+- JEvolution was compiled with java version "1.6.0_16"
+
+- Under OS Linux 2.6.32-5-686-bigmem (Java is supposed to be platform-independent..;-)
+
+CHANGES
+
+from V0.2 to V0.3:
+==============
+
+- 'JEvolutionStats' changed its name to 'JEvolutionReporter'
+
+- RealChromosome added for encoding of real values
+
+- the 'setBases()' method of 'Chromosome' has been removed, as you may simply
+change the genotype in your Phenotype implementation (but only, if you are
+very sure what you are doing..;-) for repair operations (Lamarckism)
+
+- intermediately 'Chromosome' implements Serializable (I am not sure, if this
+is sufficient for the intended purpose)
+
+
+from V0.3 to V0.4:
+==============
+
+- the selection method is now an own class implementing the Selection
+Interface, TournamentSelection and NoSelection are the current JEvolution
+native selection methods, default is binary tournament selection (compatible
+to previous versions, i.e., you do not have to change anything, if you stay
+with binary tournament selection)
+
+- the population size is no longer restricted to being even
+
+from V0.4 to V0.5:
+==============
+
+- added VaribleBitChromsome for additional evolution of chromosome length due
+to non-homologous crossover
+
+- compiled now with JDK 1.4
+
+- possibility to seed start population with individuals of previous
+runs (or heuristic solutions), changed getBestPhenotype() to getBestIndividual() 
+for that matter, and erased getBestFitness() in JEvolutionReporter, if the seed 
+population is smaller than the population size, the rest will be filled with random 
+individuals, if the seed population is larger, then it is decimated using the also 
+new selection method DecimationSelection (caution: this selection method should 
+not be used as the standard selection method, as it would be equivalent to 
+NoSelection, if parent and offspring population size are identical!)
+
+- setNumberOfGenerations() has been replaced by a more flexible definition
+of termination criteria, the number of minimal generations can be set (these are 
+always run), a fitness threshold where evolution terminates, and the maximal 
+number of generations (where evolution is terminated, if no previous criterion 
+forced a halt)
+
+- StarPool storing interesting solutions has been added to JEvolutionReporter
+
+
+from V0.5 to V0.6:
+==============
+
+- JEvolution can now handle minimization problems natively via 
+setMaximization(false), in this case lower fitness values have higher fitness, e.g.
+an Individual with fitness 0.5 has higher survival probability than an Individual 
+with fitness 0.7, default is maximization (compatible to previous versions, i.e., you 
+do not have to change anything, if you stay with maximization)
+
+- the default mutation rate has been changed from 0.005 to (1.0 / 
+chromosomeLength)
+
+- a population can now be frozen, in this state (setFreezer(true)) the next 
+generation is identical to the previous generation as long JEvolution is frozen, 
+implemented specifically for coevolutionary settings, default is not frozen 
+(compatible to previous versions, i.e., you do not have to change anything, if you 
+prefer warm weather)
+
+Bug fixes:
+
+- getIndividualsDone() gave wrong information in case of multiple runs
+
+- if no JEvolution instantiated, a RealChromosome could not be instantiated 
+(NullPointerException)
+
+
+from V0.6 to V0.7:
+==============
+
+- mutation rate may be larger than 0.5, but it is no longer changed, when changing
+the chromosome length, so now you get what you set
+
+- changed setStrategy(boolean) to setStrategy(int) in RealChromosome, three 
+strategy modes available now defined in RealChromosome
+NONE (default) - mutation with a fixed sigma, no self-adaptation
+SINGLE - a single sigma for all object parameters is evolved
+EACH - each object parameter has its own sigma being evolved 
+
+- removed get/setChromosomeShuffling(), added get/setShuffleRate(double), 
+where the shuffle rate of chromosomes can be accessed. A shuffle rate of 0.0 
+disables shuffling, a shuffle rate > 0.0 shuffles chromosomes with the given 
+probability (shuffle rate, default = 0.0/off)
+
+Bug fixes:
+
+- for the mutation of strategy parameters with a RealChromosome, the magic 
+numbers tau and tau' were calculated with n being the population size, however n 
+should be the number of object parameters, this is fixed now
+
+- problems with the initialization of a RealChromosome, it was dependent on the 
+order of parameter settings, now parameters can be set in any order
+
+from V0.7 to V0.8:
+==============
+
+- removed set/getNumberOfRuns(), the possibility for multiple JEvolution runs has 
+been replaced by a simpler and more flexible approach using the new method 
+doEvolve(int) allowing to halt JEvolution after a given number of generations, 
+together with the unchanged method doEvolve() various modes can be realized, 
+some examples:
+
+	+ doEvolve() - a complete JEvolution run until termination (unchanged)
+
+	+ doEvolve()
+	   doEvolve() - two complete JEvolution runs
+
+	+ doEvolve(10) - run JEvolution for 10 generations, but only if JEvolution
+			has not terminated in fewer than 10 generations, a return
+			value of 0 indicates termination, otherwise the number of
+			completed generations is returned
+
+	+ doEvolve(10)
+	   doEvolve()    - run JEvolution for 10 generations, then finish the run
+
+	+ while (doEvolve(1) != 0) - run JEvolution in single step generations 
+					until termination
+
+- in long evolution runs with detailed output the buffer space holding the output 
+could become very large, because of this the PrintWriter in JEvolutionReporter 
+responsible for the report output was changed to auto-flush mode, if providing a 
+different PrintWriter, it should also use auto-flush mode
+
+Bug fixes:
+
+- if a fitness threshold was set, JEvolution neglected the maximal number of 
+generations, it terminated only, when the threshold was reached
+
+- JEvolutionReporter may have reported an incorrect fitness value for the best 
+individual of the run, however, the individual returned by getBestIndividual() was 
+always correct, but on rare occasions (more likely the smaller the population size), 
+the reported value ONLY (written to the output) was incorrect
+
+from V0.8 to V0.9:
+==============
+
+- introduced additional constructor for Chromosomes with the chromosome length as parameter
+e.g., new BitChromosome(50)
+
+- changed internal management of fitness threshold slightly, the default values are now Double.MAX_VALUE in case of maximization, and Double.MIN_VALUE for minimization, i.e., no threshold, so if you set a threshold, and then want to reset it, use above values
+
+- added a mechanism to save a population to a file and restore it from that file via recordPopulation() and restorePopulation() in class JEvolution
+
+Bug fixes:
+
+- setLowInt() in IntChromosome did not change the lower bound 0
+
+from V0.9 to V0.9.1:
+===============
+
+- JEvolution is now a singleton, create it and use it with JEvolution.getInstance()
+
+- there are now two population sizes, a parent size, and an offspring size (so as to model mu, lambda in ES style), but yo can still use the old setPopulationSize(size), which simply calls setPopulationSize(size, size), the old getPopulationSize() is gone and replaced by getParentCount() [= mu] and getOffspringCount() [= lambda], note that with mu != lambda the selection method is automatically set to (mu, lambda)-selection
+
+- all random numbers are now drawn from methods in Utilities, which use a single java.util.Random object, a random seed can be set with Utilities.setRandomSeed(long seed), if you use random numbers in your application and the runs should be repeatable, then only use the random number methods in Utilities and NO others
+
+- added two methods express() in Utilities for decoding of a bit sequence into double or integer (see comments in API)
+
+- the best individual is now removed, if an individual with the SAME or better fitness emerges (before it was only removed by an individual with BETTER fitness), for most applications this change will be irrelevant, but for some it may be useful
+
+- at maximum only one individual per generation is now added to the star pool (if it has better or same fitness as the old best individual), before if more individuals in a generation had better fitness than the current best, all of them have been put into the star pool
+
+- renamed methods getLowInt() to getLow() and getHighInt() to getHigh() in IntChromosome
+
+- renamed methods getLowReal() to getLow() and getHighReal() to getHigh() in RealChromosome
+
+Bug fixes:
+
+- decimation selection only worked properly with a maximization problem, in case of a minimization problem the worst individuals have been selected
+
+
+from V0.9.1 to V0.9.8:
+===============
+
+- added GP support (see evSOLve.JEvolution.gp)
+
+- added loading and storing of individuals via XML File
+
+- re-arranged package structure, chromosomes and selection are new packages
+
+- BitChromosome now uses List<Boolean> instead of Bitset for the bit string
+
+- user may now setTimeLimit() for evolution, evolution time added to run information
+
+- Selection is no longer an interface but an abstract class
+
+- added setLethalValue() in Selection, individuals with lethal fitness are not considered for selection (only
+  used for TournamentSelection now)
+
+- removed fitness repository
+
+- added more flexible reporter concept
+  + Reporter is now an interface and JEvolutionReporter is the default implementation
+  + user may implement custom reporter
+
+- added meteorite impacts destroying the population, see setMeteorite()
+
+- added getCurrentGeneration() also for easier detection of generation transition
+
+- removed getIndividualsDone(), use getCurrentGeneration()
+
+- reset definition of best fitness, now again, a new best individual recorded is the one, whose fitness
+    is strictly better than that of the old best individual
+
+- renamed getLastPopulation() to getOffspring()
+
+- new method getParents() to retrieve the parent population
+
+- when the size of the parent and offspring population is different, then DecimationSelection has been forced, now
+    DecimationSelection is set, when using setPopulationSize(int, int), but it may be changed later by the user
+
+Bug fixes:
+
+- the genotype of a seed individual added to the seed population has not been taken from the seed individual
+
+- the step mode of evolution was temporarily dysfunctional
