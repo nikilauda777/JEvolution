@@ -4,6 +4,7 @@
 
 import evSOLve.JEvolution.*;
 import evSOLve.JEvolution.chromosomes.BitChromosome;
+import evSOLve.JEvolution.chromosomes.PermChromosome;
 import evSOLve.JEvolution.selection.TournamentSelection;
 
 /** A test bed for the package evSOLve.JEvolution.
@@ -33,30 +34,27 @@ public class GATest {
 */
 	public static void main(String[] args) {
 
-		JEvolution GA = JEvolution.getInstance();								//+ call it a GA
-		GA.setMaximization(false);												//o minimization problem
-		JEvolutionReporter GAReporter = (JEvolutionReporter)GA.getReporter();	//- get the reporter
-		BitChromosome chromX = new BitChromosome();								//+ create a chromosome
+		JEvolution GA = JEvolution.getInstance();									//+ call it an GA
+// 		EA.setMaximization(false);													//o minimization problem
+		JEvolutionReporter GAReporter = (JEvolutionReporter)GA.getReporter();		//- get the reporter
+		TerritoryChromosome chromX = new TerritoryChromosome(100);								//+ create a chromosome
 
 		try {
-			chromX.setLength(12);										//- only set to justify try statement..;-)
+			chromX.setLength(6);									//- only set to justify try statement..;-)
 //			chromX.setMutationRate(0.0);
 //			chromX.setSoupType(Chromosome.LAPLACE);
 //			chromX.setCrossoverPoints(2);
 // 			Utilities.setRandomSeed(88);
 
-			BitChromosome chromY = (BitChromosome)chromX.clone();		//- second chromosome, demonstration purpose
-
-			GA.addChromosome(chromX);									//+ tell GA about your chromosome
-			GA.addChromosome(chromY);									//- second one
-			GA.setPhenotype(new ParaboloidPhenotype());					//+ tell GA about your Phenotype class
+		TerritoryChromosome chromY = (TerritoryChromosome) chromX.clone();
+			GA.addChromosome(chromY);								//+ tell EA about your chromosome
+			GA.setPhenotype(new SimpleAgentPhenotype());					//+ tell EA about your Phenotype class
 			GA.setSelection(new TournamentSelection(3));
 // 			GA.setPopulationSize(25, 50);
-			GA.setFitnessThreshold(0.00001);				//o may cause earlier termination, hence save time
-			GA.setMaximalGenerations(100);					//o
-// 			GA.setSubPopulations(10);						//o
+			GA.setFitnessThreshold(0.00001);							//o better fitness not possible
+			GA.setMaximalGenerations(100);							//o
 
-			GAReporter.setReportLevel(JEvolutionReporter.BRIEF);
+			GAReporter.setReportLevel(JEvolutionReporter.VERBOSE);
 // 			GAReporter.useFitnessRepository(true);
 
 		} catch (JEvolutionException e) {
