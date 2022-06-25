@@ -11,21 +11,25 @@ import java.util.Map.Entry;
 import java.util.Random;
 import org.jdom2.Element;
 
-public class SimpleAgentPhenotype implements Phenotype {
+public class TruthVsSimple implements Phenotype {
 
 
+    protected double fitnessSimple;
+    protected double fitnessTruth;
     protected double fitness;
     protected int food;
     protected int water;
     protected int checkFood = 50;
     protected Entry<Integer,Integer> globalList; // here we will write a values of one territory
+
     ArrayList<MyPair> green = new ArrayList<MyPair>(); // List of pairs
     ArrayList<MyPair> red = new ArrayList<MyPair>(); // List of pairs
+    ArrayList<MyPair> territories = new ArrayList<MyPair>(); // List of pairs
 
     protected int nBases;								// the number of elements
 
 
-    public SimpleAgentPhenotype() {
+    public TruthVsSimple() {
     }
 
 
@@ -38,7 +42,7 @@ public class SimpleAgentPhenotype implements Phenotype {
 
     public Object clone() {
         try {
-            SimpleAgentPhenotype clone = (SimpleAgentPhenotype) super.clone();
+            TruthVsSimple clone = (TruthVsSimple) super.clone();
             return(clone);
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e.toString());			//should not happen
@@ -55,16 +59,17 @@ public class SimpleAgentPhenotype implements Phenotype {
         List perm = (List) chrom.getBases();
         nBases = chrom.getLength(); // 6 with 3 territories
         Integer index;
-        for (int i = 0; i < nBases; i++) {
+        for (int i = 0; i <= nBases; i++) {
             index = (Integer) perm.get(i);
             if (i % 2 != 0) { // even numbers where we have planed the position of territory
-                if (checkFood <= index) {  // 50 >= Food check for parameter food
+                if(checkFood <= index) {  // 50 >= Food check for parameter food
                     /** Add Green Territory **/
                     MyPair pair = new MyPair(); // Object of pairs
                     pair.setFood(index);
                     pair.setWater( (Integer) perm.get(
                         i - 1));
                     green.add(pair); // add the green territories to our list of pair [water,food]
+                    territories.add(pair);   // add all available territories
                 }
                 /**Add Red Territory */
                 else{
@@ -73,21 +78,37 @@ public class SimpleAgentPhenotype implements Phenotype {
                     pair2.setWater( (Integer) perm.get(
                         i - 1));
                     red.add(pair2);
+                    territories.add(pair2);   // add all available territories
                 }
             }
         }
     }
     /** Here the fitness is simply the percentage of correct elements. */
     public void calcFitness() {
+        calcSimple();
+        calcTruth(territories);
 
+        if(fitnessTruth > fitnessSimple){
+            fitness = fitnessTruth;
+            System.out.println("Truth strategy wins");
+        }
+        else if (fitnessTruth < fitnessSimple) {
+            fitness = fitnessSimple;
+            System.out.println("Simple strategy wins");
+        } else {
+            System.out.println("Two strategies stably coexist.");
+        }
+    }
+
+    public double calcSimple(){
         Random rand = new Random();
         // check if doesnt have green
-        if(green.size() <= 0){
+        if(green.size() <= 0) {
             for (int i = 0; i < red.size(); i++) {
                 int randomIndex = rand.nextInt(red.size()); // generate Random number
                 food = (int) red.get(randomIndex).getFood();
                 water = (int) red.get(randomIndex).getWater();
-                fitness = food + water; // the utility of the territory becames agents fitness
+                fitnessSimple = food + water; // the utility of the territory becames agents fitness
             }
         }
         // chose randomly the Green territories
@@ -96,12 +117,41 @@ public class SimpleAgentPhenotype implements Phenotype {
                 int randomIndex = rand.nextInt(green.size()); // generate Random number
                 food = (int) green.get(randomIndex).getFood();
                 water = (int) green.get(randomIndex).getWater();
-                fitness = food + water; // the utility of the territory becames agents fitness
+                fitnessSimple = food + water; // the utility of the territory becames agents fitness
             }
         }
-        System.out.println("Food:" + food);
-        System.out.println("fitness:" + fitness);
+        return fitnessSimple;
     }
+
+    public double calcTruth (ArrayList<MyPair> territories) {
+
+        ArrayList<Integer> resources = new ArrayList<>();
+        // delete the territory which was choosen by simple agent
+        territories.removeIf(pair -> pair.getFood() == food && pair.getWater() == water);
+
+        if(territories.size() > 0){
+            int i = 0;
+            while( i < territories.size()){
+                int sum;
+                food = (int) territories.get(i).getFood();
+                water = (int) territories.get(i).getWater();
+                sum = food + water;
+                resources.add(sum);
+                i += 1;
+            }
+            // find the maximum
+            double cost = 0;
+            int sum = resources.get(0);
+            for (int j = 0; j < resources.size(); j++) {
+                if (sum < resources.get(j))
+                    sum = resources.get(j);
+                cost += j;
+            }
+            fitnessTruth = sum - (int) (Math.log(cost*100) / Math.log(2));
+        }
+        return fitnessTruth;
+    }
+
 
 
     /** Access to the fitness of the Phenotype. */
@@ -122,33 +172,5 @@ public class SimpleAgentPhenotype implements Phenotype {
     }
 //
 }
-class MyPair {
-    private Integer x = 0;
-    private Integer y = 0;
 
-    public MyPair(Integer x, Integer y)
-    {
-        this.x = x;
-        this.y = y;
-    }
 
-    public MyPair()
-    {
-
-    }
-    public double getWater() {
-        return x;
-    }
-
-    public void setWater(Integer x) {
-        this.x = x;
-    }
-
-    public double getFood() {
-        return y;
-    }
-
-    public void setFood(Integer y) {
-        this.y = y;
-    }
-}

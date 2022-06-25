@@ -48,7 +48,7 @@ public class GATest {
 
 		TerritoryChromosome chromY = (TerritoryChromosome) chromX.clone();
 			GA.addChromosome(chromY);								//+ tell EA about your chromosome
-			GA.setPhenotype(new SimpleAgentPhenotype());					//+ tell EA about your Phenotype class
+			GA.setPhenotype(new TruthVsSimple());					//+ tell EA about your Phenotype class				//+ tell EA about your Phenotype class
 			GA.setSelection(new TournamentSelection(3));
 // 			GA.setPopulationSize(25, 50);
 			GA.setFitnessThreshold(0.00001);							//o better fitness not possible
