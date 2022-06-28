@@ -40,7 +40,7 @@ public class GATest {
 		TerritoryChromosome chromX = new TerritoryChromosome(100);								//+ create a chromosome
 
 		try {
-			chromX.setLength(6);									//- only set to justify try statement..;-)
+			chromX.setLength(16);									//- only set to justify try statement..;-)
 //			chromX.setMutationRate(0.0);
 //			chromX.setSoupType(Chromosome.LAPLACE);
 //			chromX.setCrossoverPoints(2);
@@ -48,23 +48,26 @@ public class GATest {
 
 		TerritoryChromosome chromY = (TerritoryChromosome) chromX.clone();
 			GA.addChromosome(chromY);								//+ tell EA about your chromosome
-			GA.setPhenotype(new TruthVsSimple());					//+ tell EA about your Phenotype class				//+ tell EA about your Phenotype class
+			TruthVsSimple truthVsSimple = new TruthVsSimple();
+			GA.setPhenotype(truthVsSimple);					//+ tell EA about your Phenotype class				//+ tell EA about your Phenotype class
 			GA.setSelection(new TournamentSelection(3));
 // 			GA.setPopulationSize(25, 50);
 			GA.setFitnessThreshold(0.00001);							//o better fitness not possible
-			GA.setMaximalGenerations(100);							//o
+			GA.setMinimalGenerations(50);
+			GA.setMaximalGenerations(55);							//o
 
 			GAReporter.setReportLevel(JEvolutionReporter.VERBOSE);
 // 			GAReporter.useFitnessRepository(true);
+			GA.doEvolve();
+			truthVsSimple.printResults();
 
 		} catch (JEvolutionException e) {
 			System.out.println(e.toString());
 			System.out.println("Continuing with default values.");
 		}
 //		while (GA.doEvolve(1) != 0)                                   // single step generation
-//			;
-		GA.doEvolve();																						// + evolution run
-		
+//			;			// + evolution run
+
 /*		Individual best = GAReporter.getBestIndividual();
 		best.toFile("bestResult.xml");
 		Individual bestFromFile = new Individual("bestResult.xml");*/

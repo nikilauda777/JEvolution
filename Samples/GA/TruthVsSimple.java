@@ -9,10 +9,16 @@ import evSOLve.JEvolution.Phenotype;
 
 import java.util.Map.Entry;
 import java.util.Random;
+
 import org.jdom2.Element;
 
 public class TruthVsSimple implements Phenotype {
 
+    private static int simpleWins;
+    private static int truthWins;
+    private static int draws;
+
+    protected static int round;
 
     protected double fitnessSimple;
     protected double fitnessTruth;
@@ -20,37 +26,42 @@ public class TruthVsSimple implements Phenotype {
     protected int food;
     protected int water;
     protected int checkFood = 50;
-    protected Entry<Integer,Integer> globalList; // here we will write a values of one territory
+    protected Entry<Integer, Integer> globalList; // here we will write a values of one territory
 
     ArrayList<MyPair> green = new ArrayList<MyPair>(); // List of pairs
     ArrayList<MyPair> red = new ArrayList<MyPair>(); // List of pairs
     ArrayList<MyPair> territories = new ArrayList<MyPair>(); // List of pairs
 
-    protected int nBases;								// the number of elements
+    protected int nBases;                                // the number of elements
 
 
     public TruthVsSimple() {
+        simpleWins = 0;
+        truthWins = 0;
+        draws = 0;
+        round = 1;
     }
 
 
-    /** A proper clone. Here the phenotype is simply an integer, so super.clone() handles
+    /**
+     * A proper clone. Here the phenotype is simply an integer, so super.clone() handles
      * everything just fine.
      *
-     * @return Object							The clone.
-     *
+     * @return Object                            The clone.
      */
 
     public Object clone() {
         try {
             TruthVsSimple clone = (TruthVsSimple) super.clone();
-            return(clone);
+            return (clone);
         } catch (CloneNotSupportedException e) {
-            throw new InternalError(e.toString());			//should not happen
+            throw new InternalError(e.toString());            //should not happen
         }
     }
 
 
-    /** The genotype-phenotype mapper just counts the number of correct
+    /**
+     * The genotype-phenotype mapper just counts the number of correct
      * permutation elements.
      */
 
@@ -62,48 +73,56 @@ public class TruthVsSimple implements Phenotype {
         for (int i = 0; i <= nBases; i++) {
             index = (Integer) perm.get(i);
             if (i % 2 != 0) { // even numbers where we have planed the position of territory
-                if(checkFood <= index) {  // 50 >= Food check for parameter food
+                if (checkFood <= index) {  // 50 >= Food check for parameter food
                     /** Add Green Territory **/
                     MyPair pair = new MyPair(); // Object of pairs
                     pair.setFood(index);
-                    pair.setWater( (Integer) perm.get(
-                        i - 1));
+                    pair.setWater((Integer) perm.get(i - 1));
                     green.add(pair); // add the green territories to our list of pair [water,food]
                     territories.add(pair);   // add all available territories
                 }
                 /**Add Red Territory */
-                else{
+                else {
                     MyPair pair2 = new MyPair(); // Object of pairs
                     pair2.setFood(index);
-                    pair2.setWater( (Integer) perm.get(
-                        i - 1));
+                    pair2.setWater((Integer) perm.get(
+                            i - 1));
                     red.add(pair2);
                     territories.add(pair2);   // add all available territories
                 }
             }
         }
     }
-    /** Here the fitness is simply the percentage of correct elements. */
+
+    /**
+     * Here the fitness is simply the percentage of correct elements.
+     */
     public void calcFitness() {
         calcSimple();
         calcTruth(territories);
 
-        if(fitnessTruth > fitnessSimple){
+        System.out.println("======Round " + round++ + " ==========");
+        if (fitnessTruth > fitnessSimple) {
             fitness = fitnessTruth;
             System.out.println("Truth strategy wins");
-        }
-        else if (fitnessTruth < fitnessSimple) {
+            truthWins++;
+        } else if (fitnessTruth < fitnessSimple) {
             fitness = fitnessSimple;
             System.out.println("Simple strategy wins");
+            simpleWins++;
         } else {
             System.out.println("Two strategies stably coexist.");
+            draws++;
         }
+        System.out.println("Truth Fitness : " + fitnessTruth);
+        System.out.println("Simple Fitness : " + fitnessSimple);
+        System.out.println("================");
     }
 
-    public double calcSimple(){
+    public double calcSimple() {
         Random rand = new Random();
-        // check if doesnt have green
-        if(green.size() <= 0) {
+        // check if doesn't have green
+        if (green.size() <= 0) {
             for (int i = 0; i < red.size(); i++) {
                 int randomIndex = rand.nextInt(red.size()); // generate Random number
                 food = (int) red.get(randomIndex).getFood();
@@ -123,15 +142,24 @@ public class TruthVsSimple implements Phenotype {
         return fitnessSimple;
     }
 
-    public double calcTruth (ArrayList<MyPair> territories) {
+    public void printResults() {
+        System.out.println("==== Total Results ====");
+        System.out.println("Number of rounds in total : " + round);
+        System.out.println("Truth wins : " + ((double) truthWins / (round - 1) * 100) + "%");
+        System.out.println("Simple wins : " + +((double) simpleWins / (round - 1) * 100) + "%");
+        System.out.println("Draws : " + +((double) draws / (round - 1) * 100) + "%");
+        System.out.println("=== === === === === ");
+    }
+
+    public double calcTruth(ArrayList<MyPair> territories) {
 
         ArrayList<Integer> resources = new ArrayList<>();
-        // delete the territory which was choosen by simple agent
+        // delete the territory which was chosen by simple agent
         territories.removeIf(pair -> pair.getFood() == food && pair.getWater() == water);
 
-        if(territories.size() > 0){
+        if (territories.size() > 0) {
             int i = 0;
-            while( i < territories.size()){
+            while (i < territories.size()) {
                 int sum;
                 food = (int) territories.get(i).getFood();
                 water = (int) territories.get(i).getWater();
@@ -147,27 +175,32 @@ public class TruthVsSimple implements Phenotype {
                     sum = resources.get(j);
                 cost += j;
             }
-            fitnessTruth = sum - (int) (Math.log(cost*100) / Math.log(2));
+            fitnessTruth = sum - (int) (Math.log(cost * 100) / Math.log(2));
         }
         return fitnessTruth;
     }
 
 
-
-    /** Access to the fitness of the Phenotype. */
+    /**
+     * Access to the fitness of the Phenotype.
+     */
 
     public double getFitness() {
         return fitness;
     }
 
 
-    /** A String representation of the Phenotype. */
+    /**
+     * A String representation of the Phenotype.
+     */
 
     public String toString() {
-        return( "The values for simple agent, food: " + food + " water: " + water);
+        return ("The values for simple agent, food: " + food + " water: " + water);
     }
 
-    /** Saves the phenotype to XML. */
+    /**
+     * Saves the phenotype to XML.
+     */
     public void toXml(Element element) {
     }
 //
